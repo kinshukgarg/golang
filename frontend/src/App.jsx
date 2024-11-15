@@ -1,4 +1,7 @@
-import  { useState, useEffect } from 'react';
+
+import { useState, useEffect } from 'react';
+
+import './App.css'; 
 
 function App() {
   const [notes, setNotes] = useState([]);
@@ -25,7 +28,7 @@ function App() {
   };
 
   return (
-    <div>
+    <div className="App">
       <h1>Notes</h1>
       <form onSubmit={handleCreateNote}>
         <input
