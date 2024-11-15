@@ -1,59 +1,56 @@
-import {
-  MDBInput,
-  MDBCol,
-  MDBRow,
-  MDBCheckbox,
-  MDBBtn,
-  MDBIcon
-} from 'mdb-react-ui-kit';
+import  { useState, useEffect } from 'react';
 
-export default function App() {
+function App() {
+  const [notes, setNotes] = useState([]);
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+
+  useEffect(() => {
+    fetch('http://localhost:8080/notes')
+      .then((response) => response.json())
+      .then((data) => setNotes(data));
+  }, []);
+
+  const handleCreateNote = (e) => {
+    e.preventDefault();
+    fetch('http://localhost:8080/notes/new', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ title, content }),
+    })
+      .then((response) => response.json())
+      .then((newNote) => setNotes([...notes, newNote]));
+  };
+
   return (
-    <form>
-      <MDBRow className='mb-4'>
-        <MDBCol>
-          <MDBInput id='form3Example1' label='First name' />
-        </MDBCol>
-        <MDBCol>
-          <MDBInput id='form3Example2' label='Last name' />
-        </MDBCol>
-      </MDBRow>
-      <MDBInput className='mb-4' type='email' id='form3Example3' label='Email address' />
-      <MDBInput className='mb-4' type='password' id='form3Example4' label='Password' />
-
-      <MDBCheckbox
-        wrapperClass='d-flex justify-content-center mb-4'
-        id='form3Example5'
-        label='Subscribe to our newsletter'
-        defaultChecked
-      />
-
-      <MDBBtn type='submit' className='mb-4' block>
-        Sign in
-      </MDBBtn>
-
-      <div className='text-center'>
-        <p>
-          Not a member? <a href='#!'>Register</a>
-        </p>
-        <p>or sign up with:</p>
-
-        <MDBBtn floating color="secondary" className='mx-1'>
-          <MDBIcon fab icon='facebook-f' />
-        </MDBBtn>
-
-        <MDBBtn floating color="secondary" className='mx-1'>
-          <MDBIcon fab icon='google' />
-        </MDBBtn>
-
-        <MDBBtn floating color="secondary" className='mx-1'>
-          <MDBIcon fab icon='twitter' />
-        </MDBBtn>
-
-        <MDBBtn floating color="secondary" className='mx-1'>
-          <MDBIcon fab icon='github' />
-        </MDBBtn>
-      </div>
-    </form>
+    <div>
+      <h1>Notes</h1>
+      <form onSubmit={handleCreateNote}>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Title"
+        />
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Content"
+        />
+        <button type="submit">Add Note</button>
+      </form>
+      <ul>
+        {notes.map((note) => (
+          <li key={note.ID}>
+            <h2>{note.Title}</h2>
+            <p>{note.Content}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
+
+export default App;
