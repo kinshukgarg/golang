@@ -1,57 +1,39 @@
 
-import { useState, useEffect } from 'react';
-
-import './App.css'; 
+import  { useState, useEffect } from 'react';
+import NoteList from './components/NoteList';
+import NoteForm from './components/NoteForm';
+import './App.css';
 
 function App() {
   const [notes, setNotes] = useState([]);
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
 
   useEffect(() => {
+    // Fetch notes from the backend
     fetch('http://localhost:8080/notes')
       .then((response) => response.json())
-      .then((data) => setNotes(data));
+      .then(setNotes);
   }, []);
 
-  const handleCreateNote = (e) => {
-    e.preventDefault();
-    fetch('http://localhost:8080/notes/new', {
+  const addNote = (newNote) => {
+    fetch('http://localhost:8080/notes', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ title, content }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newNote),
     })
       .then((response) => response.json())
-      .then((newNote) => setNotes([...notes, newNote]));
+      .then((note) => setNotes((prevNotes) => [...prevNotes, note]));
+  };
+
+  const deleteNote = (id) => {
+    fetch(`http://localhost:8080/notes/${id}`, { method: 'DELETE' })
+      .then(() => setNotes((prevNotes) => prevNotes.filter((note) => note.id !== id)));
   };
 
   return (
     <div className="App">
       <h1>Notes</h1>
-      <form onSubmit={handleCreateNote}>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title"
-        />
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Content"
-        />
-        <button type="submit">Add Note</button>
-      </form>
-      <ul>
-        {notes.map((note) => (
-          <li key={note.ID}>
-            <h2>{note.Title}</h2>
-            <p>{note.Content}</p>
-          </li>
-        ))}
-      </ul>
+      <NoteForm onSubmit={addNote} />
+      <NoteList notes={notes} onDelete={deleteNote} />
     </div>
   );
 }
